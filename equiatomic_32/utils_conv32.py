@@ -3,16 +3,11 @@ import numpy as np
 from random import randrange
 from itertools import combinations
 
-ind_1nn = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/graph/fcc_32/ind_1nn.npy')
-ind_2nn = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/graph/fcc_32/ind_2nn.npy')
-ind_3nn = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/graph/fcc_32/ind_3nn.npy')
-ind_4nn = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/graph/fcc_32/ind_4nn.npy')
-# ele_demo_20 = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/elelist_3333_20.npy')[:10]
-# ele_demo_30 = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/elelist_3333_30.npy')[:10]
-# ele_demo_40 = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/elelist_3333_40.npy')[:10]
-# ele_demo = np.concatenate([ele_demo_20, ele_demo_30, ele_demo_40], axis=0)
-# len_demo = len(ele_demo)
-# action_list = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/rainbow_try_1_0/cum_list_prime12.npy')
+ind_1nn = np.load('./struc_info/ind_1nn.npy')
+ind_2nn = np.load('./struc_info/ind_2nn.npy')
+ind_3nn = np.load('./struc_info/ind_3nn.npy')
+ind_4nn = np.load('./struc_info/ind_4nn.npy')
+
 ideal_1, ideal_2, ideal_3, ideal_4 = 0, 0, 0, 0
 
 def find_overlap(A, B):
