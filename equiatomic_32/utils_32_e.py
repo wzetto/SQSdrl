@@ -1,33 +1,14 @@
 import math
 import numpy as np
 from random import randrange
-from itertools import combinations
 
-ind_1nn = np.load('./struc_info/ind_1nn.npy')
-ind_2nn = np.load('./struc_info/ind_2nn.npy')
-ind_3nn = np.load('./struc_info/ind_3nn.npy')
-ind_4nn = np.load('./struc_info/ind_4nn.npy')
+#*Index of 1~4NN pairs in 32-atom cells.
+ind_1nn = np.load('struc_info/ind_1nn.npy')
+ind_2nn = np.load('struc_info/ind_2nn.npy')
+ind_3nn = np.load('struc_info/ind_3nn.npy')
+ind_4nn = np.load('struc_info/ind_4nn.npy')
 
 ideal_1, ideal_2, ideal_3, ideal_4 = 0, 0, 0, 0
-
-def find_overlap(A, B):
-
-    if not A.dtype == B.dtype:
-        raise TypeError("A and B must have the same dtype")
-    if not A.shape[1:] == B.shape[1:]:
-        raise ValueError("the shapes of A and B must be identical apart from "
-                         "the row dimension")
-
-    # reshape A and B to 2D arrays. force a copy if neccessary in order to
-    # ensure that they are C-contiguous.
-    A = np.ascontiguousarray(A.reshape(A.shape[0], -1))
-    B = np.ascontiguousarray(B.reshape(B.shape[0], -1))
-
-    # void type that views each row in A and B as a single item
-    t = np.dtype((np.void, A.dtype.itemsize * A.shape[1]))
-
-    # use in1d to find rows in A that are also in B
-    return np.in1d(A.view(t), B.view(t))
 
 def abs_dis(a, b, target):
     return abs(np.linalg.norm(np.array(a) - np.array(b)) - target)
@@ -40,19 +21,19 @@ def phi2(x):
 
 def cpr(val1, val2):
     cor_func = (phi1(val1)*phi1(val2)
-            +phi1(val1)*phi2(val2)
-            +phi2(val1)*phi1(val2)
-            +phi2(val1)*phi2(val2))
+              +(phi1(val1)*phi2(val2)
+              +phi2(val1)*phi1(val2))/2
+              +phi2(val1)*phi2(val2))
 
     return cor_func
 
 def cor_func(ind_nNN, ele_list):
     cor_func_n = 0
     for i in ind_nNN:
-        phi1_1 = math.sqrt(3/2)*ele_list[i[0]]
-        phi1_2 = math.sqrt(2)*(3/2*(ele_list[i[0]]**2) - 1)
-        phi2_1 = math.sqrt(3/2)*ele_list[i[1]]
-        phi2_2 = math.sqrt(2)*(3/2*(ele_list[i[1]]**2) - 1)
+        phi1_1 = phi1(ele_list[i[0]])
+        phi1_2 = phi2(ele_list[i[0]])
+        phi2_1 = phi1(ele_list[i[1]])
+        phi2_2 = phi2(ele_list[i[1]])
         cor_func_n += phi1_1*phi2_1+(phi1_1*phi2_2+phi1_2*phi2_1)/2+phi1_2*phi2_2
     return cor_func_n
 
@@ -60,7 +41,7 @@ def ele_list_gen(cr_content, co_content, ni_content, mode='randchoice'):
     np.random.seed()
     # if iter <= len_demo:
     #     return ele_demo[iter]
-    assert abs(cr_content+co_content+ni_content-1)<0.001, 'Make sure atomic ratio sum to 1'
+    assert abs(cr_content+co_content+ni_content-1)<0.001, 'Make sure the atomic concentration sums to 1.'
 
     while True:
         if mode == 'randchoice':
@@ -79,6 +60,7 @@ def ele_list_gen(cr_content, co_content, ni_content, mode='randchoice'):
     
     return ele_list_raw
 
+#*Only 1NN pairs are taken into consideration.
 def cor_func_all(state):
     return abs(cor_func(ind_1nn, state)-ideal_1)
 
@@ -109,7 +91,7 @@ def swap_step(action, state, target_val, step, reward_type = 'base'):
     # elif reward_type == 'base2': #*bad
     #     reward = np.tanh(cor_func_raw - cor_func_new)
 
-    # elif reward_type == 'sigmoid': #*a bit
+    # elif reward_type == 'sigmoid': #*working a little bit
     #     if diff < 1:
     #         reward = np.exp(-step)*(1-diff)
     #     elif diff >= 1:
