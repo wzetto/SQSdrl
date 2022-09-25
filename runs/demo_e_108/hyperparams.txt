@@ -1,0 +1,6 @@
+comment: Inv r
+FC layers: 32, 6
+Actication: Tanh
+lr: 1e-05, mini_bs: 512, bs: 2048
+gamma: 0.93, clip: 0.1, lamda: 0.95
+k_epoch: 16
