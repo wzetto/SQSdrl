@@ -1,12 +1,12 @@
 import numpy as np
-from utils_conv32 import abs_dis, ele_list_gen, cor_func_all, ideal_cor_func, swap_step, ideal_cor_func
+from env_32_none import abs_dis, ele_list_gen, cor_func_all, ideal_cor_func, swap_step, ideal_cor_func
 import random
 import math
 import multiprocessing as mp
 import time
 from itertools import combinations
-ind_1nn = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/graph/fcc_32/ind_1nn.npy')
-ind_4nn = np.load('/media/wz/7AD631A4D6316195/Projects/SQS_drl/graph/fcc_32/ind_4nn.npy')
+path = '/media/wz/a7ee6d50-691d-431a-8efb-b93adc04896d/Github/SQSdrl/'
+ind_1nn = np.load(path+'struc_info/ind_1nn.npy')
 action_list = np.array([[i,j] for i, j in combinations(np.arange(32), 2)])
 
 def remove_none(a):
@@ -37,8 +37,8 @@ def main(iter):
     buffer = []
     cor_func_raw = cor_func_raw
     step_max = 2
-    ele_traj = np.zeros(96)
-    ele_traj[:32] = ele_list
+    # ele_traj = np.zeros(96)
+    # ele_traj[:32] = ele_list
     action_dim = 108
 
     while step_count <= step_max:
@@ -51,7 +51,7 @@ def main(iter):
             cor_func_raw = cor_func_n
             s_a_pair = np.concatenate([ele_list, action/31])
             ele_list = ele_list_n
-            ele_traj[32+step_count] = a_ind/action_dim
+            # ele_traj[32+step_count] = a_ind/action_dim
             buffer.append(s_a_pair.tolist())
             step_count += 1
 
@@ -61,10 +61,10 @@ def main(iter):
             return buffer
             
 def multicore(iter_time, process_num):
-    # pool = mp.Pool(processes=2)#自动分配进程/核
+    # pool = mp.Pool(processes=2)
     pool = mp.Pool(processes=process_num)
     output_list = [pool.map(main, range(iter_time))]
-    # map equation to the value
+    # map the equation to the value
     return output_list
 
 if __name__ == '__main__':
@@ -76,10 +76,10 @@ if __name__ == '__main__':
     start_ = time.time()
     output_list = [multicore(iter_time, process_num=20)][0][0]
     output_list = [i for i in output_list if i]
-    np.save(f'/media/wz/7AD631A4D6316195/Projects/SQS_drl/ppo_try_ver2_0/expert_traj_32_tar{tar}_try{trial}_step{step}_{comment}.npy', output_list)
-    np.save(f'/media/wz/7AD631A4D6316195/Projects/SQS_drl/graph/expert_traj/tar{tar}_try{trial}_step{step}_{comment}.npy', output_list)
+    np.save(path+f'ExpertTraj/expert_traj_32_tar{tar}_try{trial}_step{step}_{comment}.npy', output_list)
+    np.save(path+f'ExpertTraj/tar{tar}_try{trial}_step{step}_{comment}.npy', output_list)
     second_to_hour(time.time() - start_)
     try:
         print(len(output_list))
     except:
-        print('sadly nothing reached goal')
+        print('Sadly nothing reached the goal')
