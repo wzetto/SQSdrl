@@ -36,7 +36,7 @@ def main(iter):
     step_count = 0
     buffer = []
     cor_func_raw = cor_func_raw
-    step_max = 2
+    step_max = 1
     # ele_traj = np.zeros(96)
     # ele_traj[:32] = ele_list
     action_dim = 108
@@ -44,21 +44,23 @@ def main(iter):
     while step_count <= step_max:
         a_ind = np.random.choice(range(action_dim))
         action = ind_1nn[a_ind]
-        ele_list_n, r, cor_func_n, _ = swap_step(action, ele_list, 0, 0, ideal_cor)
-        r_ = np.exp(r)
-        if np.random.rand() <= np.min([r_, 1]) and cor_func_n != cor_func_raw:
-            # a_ind = np.where(np.linalg.norm(action - action_list, axis=1) == 0)[0][0]
-            cor_func_raw = cor_func_n
-            s_a_pair = np.concatenate([ele_list, action/31])
-            ele_list = ele_list_n
-            # ele_traj[32+step_count] = a_ind/action_dim
-            buffer.append(s_a_pair.tolist())
-            step_count += 1
+        #* Hard-mask
+        if ele_list[action[0]] != ele_list[action[1]]:
+            ele_list_n, r, cor_func_n, _ = swap_step(action, ele_list, 0, 0, ideal_cor)
+            r_ = np.exp(r)
+            if np.random.rand() <= np.min([r_, 1]) and cor_func_n != cor_func_raw:
+                # a_ind = np.where(np.linalg.norm(action - action_list, axis=1) == 0)[0][0]
+                cor_func_raw = cor_func_n
+                s_a_pair = np.concatenate([ele_list, action/31])
+                ele_list = ele_list_n
+                # ele_traj[32+step_count] = a_ind/action_dim
+                buffer.append(s_a_pair.tolist())
+                step_count += 1
 
-        if cor_func_n < 8:
-            print(iter)
-            step_count = 21
-            return buffer
+            if cor_func_n < 8:
+                print(iter)
+                step_count = 21
+                return buffer
             
 def multicore(iter_time, process_num):
     # pool = mp.Pool(processes=2)
@@ -69,12 +71,13 @@ def multicore(iter_time, process_num):
 
 if __name__ == '__main__':
     iter_time = 100000
-    trial = 18
-    step = 2
+    trial = 20
+    step = 1
     tar = 8
-    comment = 'nonenormal_108'
+    #* Hard mask relates to the prohibition from pairs of the same element.
+    comment = 'nonenormal_108_hardmask'
     start_ = time.time()
-    output_list = [multicore(iter_time, process_num=20)][0][0]
+    output_list = [multicore(iter_time, process_num=15)][0][0]
     output_list = [i for i in output_list if i]
     np.save(path+f'ExpertTraj/expert_traj_32_tar{tar}_try{trial}_step{step}_{comment}.npy', output_list)
     np.save(path+f'ExpertTraj/tar{tar}_try{trial}_step{step}_{comment}.npy', output_list)
